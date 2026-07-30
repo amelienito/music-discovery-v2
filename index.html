@@ -1,1 +1,673 @@
-test
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music Discovery — V1</title>
+
+  <style>
+    :root {
+      --bg: #11100f;
+      --surface: #1b1917;
+      --surface-light: #292521;
+      --text: #f5eee3;
+      --muted: #a59b8d;
+      --accent: #e7a85b;
+      --accent-2: #c36d52;
+      --border: rgba(255,255,255,.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 80% 10%, rgba(191, 103, 67, .2), transparent 30%),
+        radial-gradient(circle at 10% 90%, rgba(226, 169, 89, .12), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: auto;
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    .logo {
+      font-size: 18px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .library-button {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+      padding: 10px 15px;
+      border-radius: 999px;
+      transition: .2s;
+    }
+
+    .library-button:hover {
+      background: var(--surface-light);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      animation: appear .45s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .intro {
+      max-width: 720px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 12px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: clamp(48px, 9vw, 104px);
+      line-height: .92;
+      font-weight: normal;
+      margin: 0 0 30px;
+    }
+
+    h2 {
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 1;
+      font-weight: normal;
+      margin: 0 0 20px;
+    }
+
+    p {
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    .intro p {
+      max-width: 500px;
+      margin: 0 auto 34px;
+    }
+
+    .primary {
+      border: 0;
+      color: #24170e;
+      background: var(--accent);
+      padding: 15px 24px;
+      border-radius: 999px;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      transition: .2s;
+    }
+
+    .primary:hover {
+      background: #f2c078;
+      transform: translateY(-2px);
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 900px;
+      margin: 40px auto 0;
+    }
+
+    .choice {
+      min-height: 180px;
+      text-align: left;
+      padding: 24px;
+      border-radius: 18px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: .25s;
+    }
+
+    .choice:hover {
+      background: var(--surface-light);
+      border-color: var(--accent);
+      transform: translateY(-5px);
+    }
+
+    .choice strong {
+      display: block;
+      font-size: 25px;
+      font-weight: normal;
+      margin-bottom: 14px;
+    }
+
+    .choice small {
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    .discovery-layout {
+      display: grid;
+      grid-template-columns: 1fr 330px;
+      gap: 28px;
+      align-items: center;
+      max-width: 950px;
+      margin: auto;
+    }
+
+    .record {
+      position: relative;
+      min-height: 580px;
+      padding: 34px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.08), transparent 45%),
+        linear-gradient(145deg, var(--record-a), var(--record-b));
+      box-shadow: 0 25px 70px rgba(0,0,0,.3);
+    }
+
+    .record::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -80px;
+      top: 90px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow:
+        0 0 0 24px rgba(0,0,0,.08),
+        0 0 0 48px rgba(255,255,255,.08),
+        0 0 0 72px rgba(0,0,0,.08);
+    }
+
+    .record-top,
+    .record-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .record-number {
+      color: rgba(255,255,255,.65);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: .15em;
+    }
+
+    .record h2 {
+      max-width: 450px;
+      margin-top: auto;
+      margin-bottom: 10px;
+    }
+
+    .artist {
+      font-family: Arial, sans-serif;
+      color: rgba(255,255,255,.75);
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 28px;
+      color: rgba(255,255,255,.65);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    .side-panel {
+      padding: 25px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid var(--border);
+    }
+
+    .side-panel h3 {
+      margin: 0 0 22px;
+      font-size: 22px;
+      font-weight: normal;
+    }
+
+    .side-panel p {
+      font-size: 14px;
+      margin-bottom: 26px;
+    }
+
+    .player {
+      margin: 24px 0;
+    }
+
+    .play {
+      width: 58px;
+      height: 58px;
+      border: 0;
+      border-radius: 50%;
+      color: #21170e;
+      background: var(--accent);
+      font-size: 20px;
+    }
+
+    .progress {
+      height: 4px;
+      margin-top: 18px;
+      background: rgba(255,255,255,.15);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress div {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width .3s linear;
+    }
+
+    .reactions {
+      display: grid;
+      gap: 9px;
+    }
+
+    .reaction {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+
+    .reaction:hover {
+      background: var(--surface-light);
+      border-color: var(--accent);
+    }
+
+    .library {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .library-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .saved-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .saved-item span {
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+
+    .back {
+      margin-top: 30px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 18px;
+      }
+
+      header {
+        margin-bottom: 30px;
+      }
+
+      .choice-grid,
+      .discovery-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .choice {
+        min-height: auto;
+      }
+
+      .record {
+        min-height: 470px;
+      }
+
+      .side-panel {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">Music <span>Discovery</span></div>
+      <button class="library-button" onclick="showScreen('library')">
+        Mes trouvailles <span id="count">0</span>
+      </button>
+    </header>
+
+    <main>
+      <section id="home" class="screen active">
+        <div class="intro">
+          <div class="eyebrow">Un endroit pour se perdre</div>
+          <h1>Vous n’avez pas besoin de savoir ce que vous cherchez.</h1>
+          <p>
+            Music Discovery vous emmène vers des morceaux que vous n’auriez
+            peut-être jamais rencontrés.
+          </p>
+          <button class="primary" onclick="showScreen('intent')">
+            Entrer dans le jukebox
+          </button>
+        </div>
+      </section>
+
+      <section id="intent" class="screen">
+        <div class="intro">
+          <div class="eyebrow">Avant de commencer</div>
+          <h2>Dans quel état êtes-vous aujourd’hui ?</h2>
+
+          <div class="choice-grid">
+            <button class="choice" onclick="startDiscovery('lent')">
+              <strong>🌒 J’ai besoin de ralentir</strong>
+              <small>Des morceaux doux, intimes, presque suspendus.</small>
+            </button>
+
+            <button class="choice" onclick="startDiscovery('curieux')">
+              <strong>✦ Je suis curieux</strong>
+              <small>Des découvertes singulières, entre plusieurs mondes.</small>
+            </button>
+
+            <button class="choice" onclick="startDiscovery('vivant')">
+              <strong>☀ Je veux me sentir vivant</strong>
+              <small>Du mouvement, de la chaleur et quelques surprises.</small>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="discovery" class="screen">
+        <div class="discovery-layout">
+          <article class="record" id="record">
+            <div class="record-top">
+              <div class="record-number" id="recordNumber">DISCOVERY 001</div>
+            </div>
+
+            <div class="record-bottom">
+              <h2 id="trackTitle">Solstice</h2>
+              <div class="artist" id="trackArtist">Lumen Fields</div>
+
+              <div class="meta">
+                <span id="trackGenre">Ambient folk</span>
+                <span id="trackDuration">03:42</span>
+              </div>
+            </div>
+          </article>
+
+          <aside class="side-panel">
+            <h3>Un morceau pour vous.</h3>
+            <p id="trackDescription">
+              Une lumière douce entre les arbres. À écouter sans chercher
+              immédiatement à comprendre.
+            </p>
+
+            <div class="player">
+              <button class="play" id="playButton" onclick="togglePlay()">▶</button>
+              <div class="progress">
+                <div id="progressBar"></div>
+              </div>
+            </div>
+
+            <div class="reactions">
+              <button class="reaction" onclick="react('saved')">♡ Garder une trace</button>
+              <button class="reaction" onclick="react('curious')">✦ Ça m’intrigue</button>
+              <button class="reaction" onclick="react('skip')">→ Passer au suivant</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="library" class="screen">
+        <div class="library">
+          <div class="eyebrow">Votre carnet</div>
+          <h2>Mes trouvailles</h2>
+          <p>Les morceaux qui ont retenu votre attention apparaîtront ici.</p>
+
+          <div class="library-list" id="libraryList"></div>
+
+          <button class="back" onclick="showScreen('home')">
+            ← Revenir à l’entrée
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tracks = {
+      lent: [
+        {
+          title: "Solstice",
+          artist: "Lumen Fields",
+          genre: "Ambient folk",
+          duration: "03:42",
+          description: "Une lumière douce entre les arbres. À écouter sans chercher immédiatement à comprendre.",
+          a: "#9c624c",
+          b: "#202b2e"
+        },
+        {
+          title: "La chambre bleue",
+          artist: "Nora Vale",
+          genre: "Dream pop",
+          duration: "04:18",
+          description: "Une chanson qui ressemble à un souvenir dont on ne connaît pas encore l’origine.",
+          a: "#45627c",
+          b: "#171c2d"
+        }
+      ],
+      curieux: [
+        {
+          title: "Plastic Moon",
+          artist: "Kite Assembly",
+          genre: "Experimental soul",
+          duration: "05:06",
+          description: "Un morceau étrange, chaleureux et légèrement déséquilibré.",
+          a: "#8d4d35",
+          b: "#241b32"
+        },
+        {
+          title: "A Map of Almost",
+          artist: "Mira June",
+          genre: "Electronic jazz",
+          duration: "03:55",
+          description: "Comme entrer dans une ville inconnue et reconnaître pourtant certaines rues.",
+          a: "#6f7447",
+          b: "#28213b"
+        }
+      ],
+      vivant: [
+        {
+          title: "Neon Orchard",
+          artist: "Sunday Receiver",
+          genre: "Disco tropical",
+          duration: "04:02",
+          description: "Le genre de morceau qui ouvre une fenêtre même quand il pleut.",
+          a: "#be713a",
+          b: "#632b38"
+        },
+        {
+          title: "Soft Collision",
+          artist: "The Young Weather",
+          genre: "Indie dance",
+          duration: "03:31",
+          description: "Un peu de soleil, quelques guitares et l’envie de partir sans destination.",
+          a: "#b66d3c",
+          b: "#293f43"
+        }
+      ]
+    };
+
+    let currentMood = "curieux";
+    let currentIndex = 0;
+    let saved = [];
+    let playing = false;
+    let progress = 0;
+    let timer;
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+
+      document.getElementById(id).classList.add("active");
+
+      if (id === "library") renderLibrary();
+    }
+
+    function startDiscovery(mood) {
+      currentMood = mood;
+      currentIndex = 0;
+      loadTrack();
+      showScreen("discovery");
+    }
+
+    function loadTrack() {
+      const track = tracks[currentMood][currentIndex];
+
+      document.getElementById("trackTitle").textContent = track.title;
+      document.getElementById("trackArtist").textContent = track.artist;
+      document.getElementById("trackGenre").textContent = track.genre;
+      document.getElementById("trackDuration").textContent = track.duration;
+      document.getElementById("trackDescription").textContent = track.description;
+      document.getElementById("recordNumber").textContent =
+        `DISCOVERY ${String(currentIndex + 1).padStart(3, "0")}`;
+
+      document.getElementById("record").style.setProperty("--record-a", track.a);
+      document.getElementById("record").style.setProperty("--record-b", track.b);
+
+      stopPlayer();
+    }
+
+    function togglePlay() {
+      playing ? stopPlayer() : startPlayer();
+    }
+
+    function startPlayer() {
+      playing = true;
+      document.getElementById("playButton").textContent = "Ⅱ";
+
+      timer = setInterval(() => {
+        progress += 2;
+        document.getElementById("progressBar").style.width = progress + "%";
+
+        if (progress >= 100) stopPlayer();
+      }, 300);
+    }
+
+    function stopPlayer() {
+      playing = false;
+      clearInterval(timer);
+      document.getElementById("playButton").textContent = "▶";
+      progress = 0;
+      document.getElementById("progressBar").style.width = "0%";
+    }
+
+    function react(type) {
+      const track = tracks[currentMood][currentIndex];
+
+      if (type === "saved" || type === "curious") {
+        if (!saved.some(item => item.title === track.title)) {
+          saved.push(track);
+          document.getElementById("count").textContent = saved.length;
+        }
+      }
+
+      if (type === "skip" || type === "curious") {
+        currentIndex = (currentIndex + 1) % tracks[currentMood].length;
+        loadTrack();
+      }
+    }
+
+    function renderLibrary() {
+      const list = document.getElementById("libraryList");
+
+      if (saved.length === 0) {
+        list.innerHTML = `
+          <div class="saved-item">
+            <span>Aucune trouvaille pour le moment.</span>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = saved.map(track => `
+        <div class="saved-item">
+          <div>
+            <strong>${track.title}</strong><br>
+            <span>${track.artist} — ${track.genre}</span>
+          </div>
+          <span>${track.duration}</span>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
